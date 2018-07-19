@@ -11,13 +11,13 @@
   branch = "master"
   name = "github.com/DITAS-Project/VDC-Logging-Agent"
   packages = ["agent"]
-  revision = "e13d7adfa0224f7321a625b2c115d2e89a0aa7d2"
+  revision = "394662177e8f7896475747103049da7fc7b8bbc1"
 
 [[projects]]
   branch = "master"
   name = "github.com/DITAS-Project/VDC-Request-Monitor"
   packages = ["monitor"]
-  revision = "997f7309bbf47047769f501cbf595d7b8fcad655"
+  revision = "dd2577e05b6c9fe43b98ba6eb6722fe2ad7e5dc3"
 
 [[projects]]
   branch = "master"
@@ -53,7 +53,7 @@
   branch = "master"
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
-  revision = "f12cacf56145e2c8f0d4429694fedf5453648089"
+  revision = "f2867c24984aa53edec54a138c03db934221bdea"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -118,8 +118,8 @@
 [[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto"]
-  revision = "7d68e886eac4f7e34d0d82241a6273d6c304c5cf"
-  version = "v1.1.0"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -177,7 +177,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "d1b659f03ef58c49f92b885b227c6e22ba4b617b"
+  revision = "efc7eb8984d6655c26b5c9d2e65c024e5767c37c"
 
 [[projects]]
   branch = "master"
@@ -303,7 +303,7 @@
     "forward",
     "utils"
   ]
-  revision = "c81cf8fcd6186c0a4146560320aea7932de732e9"
+  revision = "a3ed5f65204f4ffccbb56d58cec466cdb7ab730b"
 
 [[projects]]
   branch = "master"
@@ -313,7 +313,7 @@
     "acme/autocert",
     "ssh/terminal"
   ]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
 
 [[projects]]
   branch = "master"
@@ -322,7 +322,7 @@
     "context",
     "idna"
   ]
-  revision = "d0887baf81f4598189d4e12a37c6da86f0bba4d0"
+  revision = "81d44fd177a98d09fe3bc40a5a78d495d3f042ea"
 
 [[projects]]
   branch = "master"

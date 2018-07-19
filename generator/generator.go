@@ -92,13 +92,14 @@ func (gen *Generator) Start() {
 
 func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQueue chan agent.ElasticData, trafficQueue chan []throughputagent.TrafficMessage, requestQueue chan monitor.MeterMessage) {
 
-	for _, v := range methods {
+	for k, v := range methods {
 		//TODO: sampling!
 
 		id := generateRequestID("127.0.0.1:40123")
 		requestQueue <- monitor.MeterMessage{
 			Client:        "127.0.0.1:40123",
-			Method:        normilizePath(v.Path), //TODO:normilize
+			OperationID:   k,
+			Method:        normilizePath(v.Path),
 			Kind:          v.HTTPMethod,
 			RequestLenght: rand.Int63n(1024),
 			RequestTime:   time.Duration(rand.Int63n(1000000)),
@@ -107,6 +108,7 @@ func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQue
 
 		requestQueue <- monitor.MeterMessage{
 			RequestID:      id,
+			OperationID:    k,
 			ResponseLength: rand.Int63n(1024),
 			ResponseCode:   (2 + rand.Intn(3)) * 100,
 		}
@@ -129,18 +131,24 @@ func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQue
 		agentQueue <- agent.ElasticData{
 			Timestamp: now,
 			Meter: &agent.MeterMessage{
-				Timestamp: now,
-				Value:     float64(rand.Intn(10000)),
-				Unit:      "volume",
+				OperationID: k,
+				Timestamp:   now,
+				Value:       rand.Intn(10000),
+				Name:        "volume",
+				Unit:        "number",
+				Raw:         "fake value",
 			},
 		}
 
 		agentQueue <- agent.ElasticData{
 			Timestamp: now,
 			Meter: &agent.MeterMessage{
-				Timestamp: now,
-				Value:     float64(rand.Intn(100)),
-				Unit:      "availability",
+				OperationID: k,
+				Timestamp:   now,
+				Value:       float64(rand.Intn(100)),
+				Name:        "availability",
+				Unit:        "percent",
+				Raw:         "fake value",
 			},
 		}
 	}
