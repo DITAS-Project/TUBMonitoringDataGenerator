@@ -128,28 +128,20 @@ func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQue
 		}
 		trafficQueue <- traffic
 
-		agentQueue <- agent.ElasticData{
-			Timestamp: now,
-			Meter: &agent.MeterMessage{
-				OperationID: k,
-				Timestamp:   now,
-				Value:       rand.Intn(10000),
-				Name:        "volume",
-				Unit:        "number",
-				Raw:         "fake value",
-			},
-		}
-
-		agentQueue <- agent.ElasticData{
-			Timestamp: now,
-			Meter: &agent.MeterMessage{
-				OperationID: k,
-				Timestamp:   now,
-				Value:       float64(rand.Intn(100)),
-				Name:        "availability",
-				Unit:        "percent",
-				Raw:         "fake value",
-			},
+		for _, du := range v.Method.Attributes.DataUtility {
+			for name, prop := range du.Properties {
+				agentQueue <- agent.ElasticData{
+					Timestamp: now,
+					Meter: &agent.MeterMessage{
+						OperationID: k,
+						Timestamp:   now,
+						Value:       float64(rand.Intn(1000)),
+						Name:        name,
+						Unit:        prop.Unit,
+						Raw:         "fake value",
+					},
+				}
+			}
 		}
 	}
 
