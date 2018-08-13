@@ -22,13 +22,18 @@ import (
 
 var log = logrus.New()
 
+type MeterGenerator interface {
+	generate(maximum *float64, minimum *float64, unit string) interface{}
+}
+
 type Generator struct {
 	Blueprint spec.BlueprintType
 	ESC       *elastic.Client
+	mg        MeterGenerator
 	ctx       context.Context
 }
 
-func NewGenerator() (*Generator, error) {
+func NewGenerator(mg MeterGenerator) (*Generator, error) {
 
 	path := viper.GetString("blueprint")
 	var blueprint spec.BlueprintType
@@ -61,6 +66,7 @@ func NewGenerator() (*Generator, error) {
 		Blueprint: blueprint,
 		ESC:       client,
 		ctx:       context.Background(),
+		mg:        mg,
 	}, nil
 }
 
@@ -77,10 +83,21 @@ func (gen *Generator) Start() {
 
 	go gen.startRequestAgent(requestQueue, stopSignal)
 
-	for i := 0; i < viper.GetInt("Events"); i++ {
+	sendData := func() {
 		gen.Generate(gen.Blueprint.GetMethodMap(), agentQueue, trafficQueue, requestQueue)
+
 		if viper.GetBool("pause") {
-			time.Sleep(time.Duration(rand.Int63n(viper.GetInt64("wt"))) * time.Second)
+			time.Sleep(viper.GetDuration("wt"))
+		}
+	}
+
+	if viper.GetInt("Events") > 0 {
+		for i := 0; i < viper.GetInt("Events"); i++ {
+			sendData()
+		}
+	} else {
+		for {
+			sendData()
 		}
 	}
 
@@ -135,7 +152,7 @@ func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQue
 					Meter: &agent.MeterMessage{
 						OperationID: k,
 						Timestamp:   now,
-						Value:       float64(rand.Intn(1000)),
+						Value:       gen.mg.generate(prop.Maximum, prop.Minimum, prop.Unit),
 						Name:        name,
 						Unit:        prop.Unit,
 						Raw:         "fake value",
