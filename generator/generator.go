@@ -22,8 +22,15 @@ import (
 
 var log = logrus.New()
 
+type MeterValue interface {
+	AsFloat() float64
+	AsInt() int32
+	AsDuration() time.Duration
+	AsInterface() interface{}
+}
+
 type MeterGenerator interface {
-	generate(maximum *float64, minimum *float64, unit string) interface{}
+	generate(maximum *float64, minimum *float64, unit string) MeterValue
 }
 
 type Generator struct {
@@ -84,7 +91,7 @@ func (gen *Generator) Start() {
 	go gen.startRequestAgent(requestQueue, stopSignal)
 
 	sendData := func() {
-		gen.Generate(gen.Blueprint.GetMethodMap(), agentQueue, trafficQueue, requestQueue)
+		gen.Generate(gen.Blueprint.GetMethodMap(), agentQueue, trafficQueue, requestQueue, gen.mg)
 
 		if viper.GetBool("pause") {
 			time.Sleep(viper.GetDuration("wt"))
@@ -107,61 +114,99 @@ func (gen *Generator) Start() {
 
 }
 
-func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQueue chan agent.ElasticData, trafficQueue chan []throughputagent.TrafficMessage, requestQueue chan monitor.MeterMessage) {
+func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQueue chan agent.ElasticData, trafficQueue chan []throughputagent.TrafficMessage, requestQueue chan monitor.MeterMessage, mg MeterGenerator) {
 
 	for k, v := range methods {
 		//TODO: sampling!
 
-		id := generateRequestID("127.0.0.1:40123")
-		requestQueue <- monitor.MeterMessage{
-			Client:        "127.0.0.1:40123",
-			OperationID:   k,
-			Method:        normilizePath(v.Path),
-			Kind:          v.HTTPMethod,
-			RequestLenght: rand.Int63n(1024),
-			RequestTime:   time.Duration(rand.Int63n(1000000)),
-			RequestID:     id,
-		}
+		gen.GenerateRequestData(requestQueue, k, v)
 
-		requestQueue <- monitor.MeterMessage{
-			RequestID:      id,
-			OperationID:    k,
-			ResponseLength: rand.Int63n(1024),
-			ResponseCode:   (2 + rand.Intn(3)) * 100,
-		}
+		now := gen.GenerateTrafficData(trafficQueue)
 
-		traffic := make([]throughputagent.TrafficMessage, rand.Intn(10))
-		now := time.Now()
-		for i := 0; i < len(traffic); i++ {
-			rx := rand.Intn(4096)
-			tx := rand.Intn(4096)
-			traffic[i] = throughputagent.TrafficMessage{
+		gen.GenerateAgentData(v, agentQueue, now, k, mg)
+	}
+
+}
+
+func (gen *Generator) GenerateAgentData(v spec.ExtendedMethods, agentQueue chan agent.ElasticData, now time.Time, operationID string, meterGenerator MeterGenerator) {
+	for _, du := range v.Method.Attributes.DataUtility {
+		for name, prop := range du.Properties {
+
+			if name == "responseTime" {
+				continue
+			}
+
+			agentQueue <- agent.ElasticData{
 				Timestamp: now,
-				Component: fmt.Sprintf("127.0.0.1:%d", (1000 * rand.Intn(36))),
-				Send:      rx,
-				Recived:   tx,
-				Total:     rx + tx,
+				Meter: &agent.MeterMessage{
+					OperationID: operationID,
+					Timestamp:   now,
+					Value:       meterGenerator.generate(prop.Maximum, prop.Minimum, prop.Unit).AsInterface(),
+					Name:        name,
+					Unit:        prop.Unit,
+					Raw:         "fake value",
+				},
 			}
 		}
-		trafficQueue <- traffic
+	}
+}
 
-		for _, du := range v.Method.Attributes.DataUtility {
-			for name, prop := range du.Properties {
-				agentQueue <- agent.ElasticData{
-					Timestamp: now,
-					Meter: &agent.MeterMessage{
-						OperationID: k,
-						Timestamp:   now,
-						Value:       gen.mg.generate(prop.Maximum, prop.Minimum, prop.Unit),
-						Name:        name,
-						Unit:        prop.Unit,
-						Raw:         "fake value",
-					},
-				}
+func (gen *Generator) GenerateTrafficData(trafficQueue chan []throughputagent.TrafficMessage) time.Time {
+	traffic := make([]throughputagent.TrafficMessage, rand.Intn(10))
+	now := time.Now()
+	for i := 0; i < len(traffic); i++ {
+		rx := rand.Intn(4096)
+		tx := rand.Intn(4096)
+		traffic[i] = throughputagent.TrafficMessage{
+			Timestamp: now,
+			Component: fmt.Sprintf("127.0.0.1:%d", (1000 * rand.Intn(36))),
+			Send:      rx,
+			Recived:   tx,
+			Total:     rx + tx,
+		}
+	}
+	trafficQueue <- traffic
+	return now
+}
+
+func (gen *Generator) GenerateRequestData(requestQueue chan monitor.MeterMessage, operationID string, method spec.ExtendedMethods) {
+
+	var respTimeProp *spec.MetricPropertyType
+	for _, du := range method.Method.Attributes.DataUtility {
+		for name, prop := range du.Properties {
+			if name == "responseTime" {
+				respTimeProp = &prop
+				break
 			}
 		}
 	}
 
+	var responseTime time.Duration
+	if respTimeProp != nil {
+		value := gen.mg.generate(respTimeProp.Maximum, respTimeProp.Minimum, respTimeProp.Unit)
+		responseTime = value.AsDuration()
+
+	} else {
+		responseTime = time.Duration(rand.Int63n(1000000))
+	}
+
+	id := generateRequestID("127.0.0.1:40123")
+	requestQueue <- monitor.MeterMessage{
+		Client:        "127.0.0.1:40123",
+		OperationID:   operationID,
+		Method:        normilizePath(method.Path),
+		Kind:          method.HTTPMethod,
+		RequestLenght: rand.Int63n(1024),
+		RequestTime:   responseTime,
+		RequestID:     id,
+	}
+	requestQueue <- monitor.MeterMessage{
+		RequestID:      id,
+		OperationID:    operationID,
+		RequestTime:    responseTime,
+		ResponseLength: rand.Int63n(1024),
+		ResponseCode:   (2 + rand.Intn(3)) * 100,
+	}
 }
 
 var r *regexp.Regexp = regexp.MustCompile("{[a-zA-Z0-9\\-_]*}")

@@ -5,15 +5,43 @@ import (
 	"time"
 )
 
+type GMeterValue struct {
+	data float64
+}
+
+func fromFloat(v float64) *GMeterValue {
+	return &GMeterValue{v}
+}
+
+func fromInt(v int) *GMeterValue {
+	return &GMeterValue{float64(v)}
+}
+
+func (g *GMeterValue) AsFloat() float64 {
+	return g.data
+}
+
+func (g *GMeterValue) AsInt() int32 {
+	return int32(g.data)
+}
+
+func (g *GMeterValue) AsDuration() time.Duration {
+	return time.Duration(int64(g.data * 1000 * 1000 * 1000))
+}
+
+func (g *GMeterValue) AsInterface() interface{} {
+	return g.data
+}
+
 type RandomGenerator struct{}
 
 func NewRandomMeterGenerator() RandomGenerator {
 	return RandomGenerator{}
 }
 
-func (r RandomGenerator) generate(maximum *float64, minimum *float64, unit string) interface{} {
+func (r RandomGenerator) generate(maximum *float64, minimum *float64, unit string) MeterValue {
 
-	return rand.Intn(1000)
+	return fromInt(rand.Intn(1000))
 
 }
 
@@ -23,7 +51,7 @@ func NewViolationfreeGenerator() ViolationfreeGenerator {
 	return ViolationfreeGenerator{}
 }
 
-func (r ViolationfreeGenerator) generate(maximum *float64, minimum *float64, unit string) interface{} {
+func (r ViolationfreeGenerator) generate(maximum *float64, minimum *float64, unit string) MeterValue {
 
 	var min float64
 	if minimum != nil {
@@ -38,7 +66,7 @@ func (r ViolationfreeGenerator) generate(maximum *float64, minimum *float64, uni
 		max = 100
 	}
 
-	return (min + rand.Float64()*(max-min))
+	return fromFloat(min + rand.Float64()*(max-min))
 
 }
 
@@ -58,7 +86,7 @@ func NewTimedViolationGenerator(args []string) TimedViolationGenerator {
 			failureDelay = delay
 		}
 	} else {
-		log.Error("no time set usig defaul")
+		log.Error("no time set using default")
 		failureDelay = 60 * time.Second
 	}
 
@@ -67,7 +95,7 @@ func NewTimedViolationGenerator(args []string) TimedViolationGenerator {
 	return gen
 }
 
-func (r TimedViolationGenerator) generate(maximum *float64, minimum *float64, unit string) interface{} {
+func (r TimedViolationGenerator) generate(maximum *float64, minimum *float64, unit string) MeterValue {
 	var min float64
 
 	var max float64
@@ -85,9 +113,9 @@ func (r TimedViolationGenerator) generate(maximum *float64, minimum *float64, un
 	}
 
 	if r.triggerTime.Before(time.Now()) {
-		return 0
+		return fromFloat(0)
 	}
 
-	return (min + rand.Float64()*(max-min))
+	return fromFloat(min + rand.Float64()*(max-min))
 
 }
