@@ -30,7 +30,7 @@ type MeterValue interface {
 }
 
 type MeterGenerator interface {
-	generate(maximum *float64, minimum *float64, unit string) MeterValue
+	generate(prop spec.MetricPropertyType) MeterValue
 }
 
 type Generator struct {
@@ -141,7 +141,7 @@ func (gen *Generator) GenerateAgentData(v spec.ExtendedMethods, agentQueue chan 
 				Meter: &agent.MeterMessage{
 					OperationID: operationID,
 					Timestamp:   now,
-					Value:       meterGenerator.generate(prop.Maximum, prop.Minimum, prop.Unit).AsInterface(),
+					Value:       meterGenerator.generate(prop).AsInterface(),
 					Name:        name,
 					Unit:        prop.Unit,
 					Raw:         "fake value",
@@ -183,7 +183,7 @@ func (gen *Generator) GenerateRequestData(requestQueue chan monitor.MeterMessage
 
 	var responseTime time.Duration
 	if respTimeProp != nil {
-		value := gen.mg.generate(respTimeProp.Maximum, respTimeProp.Minimum, respTimeProp.Unit)
+		value := gen.mg.generate(*respTimeProp)
 		responseTime = value.AsDuration()
 
 	} else {
