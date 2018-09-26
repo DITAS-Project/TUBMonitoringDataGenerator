@@ -20,7 +20,16 @@ import (
 	"github.com/spf13/viper"
 )
 
-var log = logrus.New()
+var logger = logrus.New()
+var log = logrus.NewEntry(logger)
+
+func SetLogger(nLogger *logrus.Logger) {
+	logger = nLogger
+}
+
+func SetLog(entty *logrus.Entry) {
+	log = entty
+}
 
 type MeterValue interface {
 	AsFloat() float64
@@ -58,6 +67,10 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 	}
 
 	ElasticSearchURL := viper.GetString("ElasticSearchURL")
+
+	util.SetLogger(logger)
+	util.SetLog(log)
+
 	util.WaitForAvailible(ElasticSearchURL, nil)
 
 	client, err := elastic.NewSimpleClient(

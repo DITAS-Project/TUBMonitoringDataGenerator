@@ -5,10 +5,11 @@ import (
 	"time"
 
 	"github.com/DITAS-Project/TUBMonitoringDataGenerator/generator"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	log "github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 type Generator int
@@ -19,8 +20,27 @@ const (
 	Timed
 )
 
+var (
+	Build string
+)
+
+var logger = logrus.New()
+var log *logrus.Entry
+
+func init() {
+	if Build == "" {
+		Build = "Debug"
+	}
+	logger.Formatter = new(prefixed.TextFormatter)
+	logger.SetLevel(logrus.DebugLevel)
+	log = logger.WithFields(logrus.Fields{
+		"prefix": "tub-gen",
+		"build":  Build,
+	})
+}
+
 func main() {
-	viper.SetDefault("ElasticSearchURL", "http://localhost:9200")
+	viper.SetDefault("elastic", "http://localhost:9200")
 	viper.SetDefault("blueprint", "resources/concrete_blueprint_doctor.json")
 	viper.SetDefault("VDCName", "tubvdc")
 	viper.SetDefault("Events", 100)
@@ -30,26 +50,25 @@ func main() {
 
 	viper.SetDefault("gen", 1)
 
-	viper.RegisterAlias("elastic", "ElasticSearchURL")
-
-	flag.String("elastic", "http://localhost:9200", "used to define the elasticURL")
+	flag.String("elastic", "http://bar:9200", "used to define the elasticURL")
 	flag.String("blueprint", "resources/concrete_blueprint_doctor.json", "the blueprint to use")
 	flag.Int("events", 100, "number of events generated and added to the elasticserach, runs infinitly if value is negative")
 	flag.Duration("wt", 10*time.Second, "mean waittime in sec between events")
 	flag.Bool("pause", true, "pause betweenEventes")
 	flag.String("VDCName", "tubvdc", "VDCName to use")
+	flag.Bool("verbose", false, "activate interal logging.")
 	flag.Int("gen", 1, "sets the internal generator to use ")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
-	if viper.GetBool("trace") {
-		viper.Set("verbose", true)
-	}
+	viper.RegisterAlias("ElasticSearchURL", "elastic")
 
 	if viper.GetBool("verbose") {
-		log.SetLevel(log.DebugLevel)
+		logger.SetLevel(logrus.DebugLevel)
+		viper.Debug()
+		log.Infof("elastic %s - %s ", viper.GetString("elastic"), viper.GetString("ElasticSearchURL"))
 	}
 
 	var mg generator.MeterGenerator
@@ -70,6 +89,9 @@ func main() {
 		log.Info("using ViolationFree Generator")
 		mg = generator.NewViolationfreeGenerator()
 	}
+
+	generator.SetLogger(logger)
+	generator.SetLog(log)
 
 	gen, err := generator.NewGenerator(mg)
 

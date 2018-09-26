@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:39a425f98fb19427061a693fe6bf0683c9bddec4b25b17067e34fdb465e39cb9"
+  name = "github.com/x-cray/logrus-prefixed-formatter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bb2702d423886830dee131692131d35648c382e2"
+  version = "v0.5.2"
+
+[[projects]]
   branch = "master"
   digest = "1:8c3cab22dfe04d6860383fabbb8a020eeeea88006da5793cc13a14b86c7a8d87"
   name = "github.com/DITAS-Project/TUBUtil"
