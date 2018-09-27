@@ -73,6 +73,8 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 
 	util.WaitForAvailible(ElasticSearchURL, nil)
 
+	log.Infof("using %s for elastic", ElasticSearchURL)
+
 	client, err := elastic.NewSimpleClient(
 		elastic.SetURL(ElasticSearchURL),
 		elastic.SetErrorLog(log),
@@ -236,6 +238,10 @@ func generateRequestID(remoteAddr string) string {
 }
 
 func (gen *Generator) startRequestAgent(queue chan monitor.MeterMessage, QuitChan chan bool) {
+
+	monitor.SetLogger(logger)
+	monitor.SetLog(log)
+
 	requestAgent, err := monitor.NewElasticReporter(monitor.Configuration{
 		ElasticSearchURL: viper.GetString("ElasticSearchURL"),
 		VDCName:          viper.GetString("VDCName"),
@@ -254,6 +260,8 @@ func (gen *Generator) startRequestAgent(queue chan monitor.MeterMessage, QuitCha
 }
 
 func (gen *Generator) startTrafficAgent(queue chan []throughputagent.TrafficMessage, QuitChan chan bool) {
+	throughputagent.SetLogger(logger)
+	throughputagent.SetLog(log)
 	for {
 
 		select {
@@ -272,6 +280,9 @@ func (gen *Generator) startTrafficAgent(queue chan []throughputagent.TrafficMess
 }
 
 func (gen *Generator) startAgent(queue chan agent.ElasticData, QuitChan chan bool) {
+	agent.SetLogger(logger)
+	agent.SetLog(log)
+
 	viper.SetDefault("tracing", false)
 	agt, err := agent.CreateAgent(agent.Configuration{
 		VDCName:          viper.GetString("VDCName"),

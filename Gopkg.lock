@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  digest = "1:39a425f98fb19427061a693fe6bf0683c9bddec4b25b17067e34fdb465e39cb9"
-  name = "github.com/x-cray/logrus-prefixed-formatter"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "bb2702d423886830dee131692131d35648c382e2"
-  version = "v0.5.2"
-
-[[projects]]
   branch = "master"
   digest = "1:8c3cab22dfe04d6860383fabbb8a020eeeea88006da5793cc13a14b86c7a8d87"
   name = "github.com/DITAS-Project/TUBUtil"
@@ -27,11 +19,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dd621d45c0ccac13f4bce15bde04fe1e5e56df42e1460e68402a60a3bd70effd"
+  digest = "1:46ba79dcd716812867fe0edfa7f20537c133081efaa96a49ccbdc98111cfe0e5"
   name = "github.com/DITAS-Project/VDC-Request-Monitor"
   packages = ["monitor"]
   pruneopts = "UT"
-  revision = "11cc7087871431343d0fe6fe8f87198377531486"
+  revision = "eb08a3be11d18078a4a2445931bca3c850e862c7"
 
 [[projects]]
   branch = "master"
@@ -43,11 +35,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ec2be6719f63aff3640567f4525ade3f4bc3d995bd07076bafd692a36dbca763"
+  digest = "1:0618fa95397aeb4f619e40e4df77ac7ae423eb78523b4b96174ab288ccd18015"
   name = "github.com/DITAS-Project/blueprint-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "6d1dc6c8bdf4524f6cb9505eaac89f1e308beeb0"
+  revision = "adc2255eca86e838e7000f6bb8e443e2657792c3"
 
 [[projects]]
   digest = "1:d1665c44bd5db19aaee18d1b6233c99b0b9a986e8bccb24ef54747547a48027f"
@@ -66,12 +58,12 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
-  digest = "1:66b8ed452b31eb9075bc53295952487c333a9cb555de57ed61f5664c058d9050"
+  digest = "1:aef23e9ea9f154b965b9792e32c86f315c2c689883ead4eeca8a182f6edfdfbc"
   name = "github.com/Shopify/sarama"
   packages = ["."]
   pruneopts = "UT"
-  revision = "35324cf48e33d8260e1c7c18854465a904ade249"
-  version = "v1.17.0"
+  revision = "a6144ae922fd99dd0ea5046c8137acfb7fab0914"
+  version = "v1.18.0"
 
 [[projects]]
   branch = "master"
@@ -79,7 +71,7 @@
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
-  revision = "2566ecd5d9999f7ff70e6ac702243f0dfb24e7aa"
+  revision = "a9235805469bff4c15bdd939240edb7eb9aec34f"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -179,11 +171,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
+  digest = "1:7395d0f36d5403fa2f15f04a9e83e0e667cf991d72b1988dc57206114ce7187c"
   name = "github.com/gorilla/websocket"
   packages = ["."]
   pruneopts = "UT"
-  revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
+  revision = "3130e8d3f1986de7dc3fd86255f4ce9618677508"
 
 [[projects]]
   digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
@@ -225,6 +217,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:f44d34fda864bed6d6c71514cd40b2ee097e6e67f745d5d014113e1faa5af8b7"
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b729f2633dfe35f4d1d8a32385f6685610ce1cb5"
+
+[[projects]]
+  branch = "master"
   digest = "1:a64e323dc06b73892e5bb5d040ced475c4645d456038333883f58934abbf6f72"
   name = "github.com/kr/logfmt"
   packages = ["."]
@@ -253,6 +253,30 @@
   revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
 
 [[projects]]
+  digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  digest = "1:0981502f9816113c9c8c4ac301583841855c8cf4da8c72f696b3ebedf6d0e4e5"
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
+
+[[projects]]
+  branch = "master"
+  digest = "1:2b32af4d2a529083275afc192d1067d8126b578c7a9613b26600e4df9c735155"
+  name = "github.com/mgutz/ansi"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9520e82c474b0a04dd04f8a40959027271bab992"
+
+[[projects]]
   digest = "1:645110e089152bd0f4a011a2648fbb0e4df5977be73ca605781157ac297f50c4"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
@@ -261,7 +285,7 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:ea301a49a83512e674c6bb188c846d2b023166c8ab439c9e63a1adbffe148b88"
+  digest = "1:605ac81d35c5ce7c33b6937ca081cd5ebd6a3051867b32afa08883af5113ce69"
   name = "github.com/olivere/elastic"
   packages = [
     ".",
@@ -269,8 +293,8 @@
     "uritemplates",
   ]
   pruneopts = "UT"
-  revision = "e6cae211ee802eab70248a68fe2cb03b616744c9"
-  version = "v6.2.5"
+  revision = "7c7a23ca147ace22f386500828b95e9cb226f87f"
+  version = "v6.2.6"
 
 [[projects]]
   branch = "master"
@@ -316,15 +340,15 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:d381414e3fb235fd48ede666eee8e717e5a995762d15e9c159b3ef8cc5cce7e4"
+  digest = "1:4f0885b3f0dba96128a09a6f4b4231c42688fbd05f323224c6aa5adc9f4e87bf"
   name = "github.com/pierrec/lz4"
   packages = [
     ".",
     "internal/xxh32",
   ]
   pruneopts = "UT"
-  revision = "ea731401f5c95a8ba30f15787e5e0fb77c60c66b"
-  version = "v2.0.5"
+  revision = "bb6bfd13c6a262f1943c0446eb25b7f54c1fb9a2"
+  version = "v2.0.6"
 
 [[projects]]
   digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
@@ -351,23 +375,23 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
+  digest = "1:dc2d85c13ac22c22a1f3170a41a8e1b897fa05134aaf533f16df44f66a25b4a1"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "a67f783a3814b8729bd2dac5780b5f78f8dbd64d"
+  version = "v1.1.0"
 
 [[projects]]
-  digest = "1:bd1ae00087d17c5a748660b8e89e1043e1e5479d0fea743352cda2f8dd8c4f84"
+  digest = "1:6a4a11ba764a56d2758899ec6f3848d24698d48442ebce85ee7a3f63284526cd"
   name = "github.com/spf13/afero"
   packages = [
     ".",
     "mem",
   ]
   pruneopts = "UT"
-  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
-  version = "v1.1.1"
+  revision = "d40851caa0d747393da1ffb28f7f9d8b4eeffebd"
+  version = "v1.1.2"
 
 [[projects]]
   digest = "1:516e71bed754268937f57d4ecb190e01958452336fa73dbac880894164e91c1f"
@@ -378,12 +402,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:8a020f916b23ff574845789daee6818daf8d25a4852419aae3f0b12378ba432a"
+  digest = "1:68ea4e23713989dc20b1bded5d9da2c5f9be14ff9885beef481848edd18c26cb"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
   pruneopts = "UT"
-  revision = "14d3d4c518341bea657dd8a226f5121c0ff8c9f2"
+  revision = "4a4406e478ca629068e7768fc33f3f044173c0a6"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:dab83a1bbc7ad3d7a6ba1a1cc1760f25ac38cdf7d96a5cdd55cd915a4f5ceaf9"
@@ -394,23 +418,31 @@
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:4fc8a61287ccfb4286e1ca5ad2ce3b0b301d746053bf44ac38cf34e40ae10372"
+  digest = "1:6e30a27eac59a148b3f7a32e0ba54706b31dcde5a42f63b22cb47873b62fa343"
   name = "github.com/spf13/viper"
   packages = ["."]
   pruneopts = "UT"
-  revision = "907c19d40d9a6c9bb55f040ff4ae45271a4754b9"
-  version = "v1.1.0"
+  revision = "8fb642006536c8d3760c99d4fa2389f5e2205631"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:05df070dd9839eae91d274456c0a15baa3db0c57b6cc532bb7068af5ff297ecd"
+  digest = "1:7f4c2392b8c8a3e1c175fee173092dff72d84198291a8a5d0993547d6f946712"
   name = "github.com/vulcand/oxy"
   packages = [
     "forward",
     "utils",
   ]
   pruneopts = "UT"
-  revision = "77148e9694210e5f5610328f1cd7cf65583014c2"
+  revision = "fe51048067db50958154cd4040da878b10002a3a"
+
+[[projects]]
+  digest = "1:39a425f98fb19427061a693fe6bf0683c9bddec4b25b17067e34fdb465e39cb9"
+  name = "github.com/x-cray/logrus-prefixed-formatter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bb2702d423886830dee131692131d35648c382e2"
+  version = "v0.5.2"
 
 [[projects]]
   branch = "master"
@@ -422,7 +454,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
+  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [[projects]]
   branch = "master"
@@ -433,18 +465,18 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "8a410e7b638dca158bf9e766925842f6651ff828"
+  revision = "4dfa2610cdf3b287375bbba5b8f2a14d3b01d8de"
 
 [[projects]]
   branch = "master"
-  digest = "1:7f4a61b989d94774dc61016b660cf8347f59eb0bed91a10b2f23fc72a38d45d4"
+  digest = "1:6fb1dd382722f93fcf7c52ff631f7b899d8c5d54314d88d42dd1f4e5ac404a30"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ebe1bf3edb3325c393447059974de898d5133eb8"
+  revision = "c2ed4eda69e7f62900806e4cd6e45f0429f859fa"
 
 [[projects]]
   digest = "1:0c56024909189aee3364b7f21a95a27459f718aa7c199a5c111c36cfffd9eaef"
@@ -492,6 +524,7 @@
     "github.com/sirupsen/logrus",
     "github.com/spf13/pflag",
     "github.com/spf13/viper",
+    "github.com/x-cray/logrus-prefixed-formatter",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
