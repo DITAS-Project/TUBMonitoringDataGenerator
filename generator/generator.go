@@ -27,7 +27,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/DITAS-Project/TUBUtil/util"
+	"github.com/DITAS-Project/TUBUtil"
 	"github.com/DITAS-Project/VDC-Logging-Agent/agent"
 	"github.com/DITAS-Project/VDC-Request-Monitor/monitor"
 	"github.com/DITAS-Project/VDC-Throughput-Agent/throughputagent"
