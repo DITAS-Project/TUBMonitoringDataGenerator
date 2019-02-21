@@ -59,6 +59,7 @@ func init() {
 
 func main() {
 	viper.SetDefault("elastic", "http://localhost:9200")
+	viper.SetDefault("exchangeAddress", "")
 	viper.SetDefault("blueprint", "resources/concrete_blueprint_doctor.json")
 	viper.SetDefault("VDCName", "tubvdc")
 	viper.SetDefault("Events", 100)
@@ -69,6 +70,7 @@ func main() {
 	viper.SetDefault("gen", 1)
 
 	flag.String("elastic", "http://bar:9200", "used to define the elasticURL")
+	flag.String("exchange", "", "used to define the elasticURL")
 	flag.String("blueprint", "resources/concrete_blueprint_doctor.json", "the blueprint to use")
 	flag.Int("events", 100, "number of events generated and added to the elasticserach, runs infinitly if value is negative")
 	flag.Duration("wt", 10*time.Second, "mean waittime in sec between events")

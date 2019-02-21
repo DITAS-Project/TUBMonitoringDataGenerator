@@ -63,6 +63,7 @@ type MeterGenerator interface {
 type Generator struct {
 	Blueprint spec.BlueprintType
 	ESC       *elastic.Client
+	exchange  string
 	mg        MeterGenerator
 	ctx       context.Context
 }
@@ -91,6 +92,13 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 
 	util.WaitForAvailible(ElasticSearchURL, nil)
 
+	if viper.GetString("exchange") != ""{
+		log.Infof("exchange consumer is configured, waiting until ready")
+		util.WaitForAvailible(viper.GetString("exchange") , nil)
+	}
+
+
+
 	log.Infof("using %s for elastic", ElasticSearchURL)
 
 	client, err := elastic.NewSimpleClient(
@@ -107,6 +115,7 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 		ESC:       client,
 		ctx:       context.Background(),
 		mg:        mg,
+		exchange: viper.GetString("exchange") ,
 	}, nil
 }
 
@@ -116,15 +125,16 @@ func (gen *Generator) Start() {
 	agentQueue := make(chan agent.ElasticData)
 	trafficQueue := make(chan []throughputagent.TrafficMessage)
 	requestQueue := make(chan monitor.MeterMessage)
+	exchangeQueue := make(chan monitor.ExchangeMessage)
 
 	go gen.startAgent(agentQueue, stopSignal)
 
 	go gen.startTrafficAgent(trafficQueue, stopSignal)
 
-	go gen.startRequestAgent(requestQueue, stopSignal)
+	go gen.startRequestAgent(requestQueue,exchangeQueue, stopSignal)
 
 	sendData := func() {
-		gen.Generate(gen.Blueprint.GetMethodMap(), agentQueue, trafficQueue, requestQueue, gen.mg)
+		gen.Generate(gen.Blueprint.GetMethodMap(), agentQueue, trafficQueue, requestQueue,exchangeQueue, gen.mg)
 
 		if viper.GetBool("pause") {
 			time.Sleep(viper.GetDuration("wt"))
@@ -147,12 +157,12 @@ func (gen *Generator) Start() {
 
 }
 
-func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQueue chan agent.ElasticData, trafficQueue chan []throughputagent.TrafficMessage, requestQueue chan monitor.MeterMessage, mg MeterGenerator) {
+func (gen *Generator) Generate(methods map[string]spec.ExtendedMethods, agentQueue chan agent.ElasticData, trafficQueue chan []throughputagent.TrafficMessage, requestQueue chan monitor.MeterMessage, exchangeQueue chan monitor.ExchangeMessage, mg MeterGenerator) {
 
 	for k, v := range methods {
 		//TODO: sampling!
 
-		gen.GenerateRequestData(requestQueue, k, v)
+		gen.GenerateRequestData(requestQueue,exchangeQueue, k, v)
 
 		now := gen.GenerateTrafficData(trafficQueue)
 
@@ -202,7 +212,38 @@ func (gen *Generator) GenerateTrafficData(trafficQueue chan []throughputagent.Tr
 	return now
 }
 
-func (gen *Generator) GenerateRequestData(requestQueue chan monitor.MeterMessage, operationID string, method spec.ExtendedMethods) {
+///////////////////////////
+// FROM https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const (
+    letterIdxBits = 6                    // 6 bits to represent a letter index
+    letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+    letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+
+var src = rand.NewSource(time.Now().UnixNano())
+
+func RandStringBytesMaskImprSrc(n int) string {
+    b := make([]byte, n)
+    // A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+    for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+        if remain == 0 {
+            cache, remain = src.Int63(), letterIdxMax
+        }
+        if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+            b[i] = letterBytes[idx]
+            i--
+        }
+        cache >>= letterIdxBits
+        remain--
+    }
+
+    return string(b)
+}
+///////////////////////////////////
+
+func (gen *Generator) GenerateRequestData(requestQueue chan monitor.MeterMessage,exchangeQueue chan monitor.ExchangeMessage, operationID string, method spec.ExtendedMethods) {
 
 	var respTimeProp *spec.MetricPropertyType
 	for _, du := range method.Method.Attributes.DataUtility {
@@ -224,7 +265,7 @@ func (gen *Generator) GenerateRequestData(requestQueue chan monitor.MeterMessage
 	}
 
 	id := generateRequestID("127.0.0.1:40123")
-	requestQueue <- monitor.MeterMessage{
+	msg := monitor.MeterMessage{
 		Client:        "127.0.0.1:40123",
 		OperationID:   operationID,
 		Method:        normilizePath(method.Path),
@@ -233,12 +274,34 @@ func (gen *Generator) GenerateRequestData(requestQueue chan monitor.MeterMessage
 		RequestTime:   responseTime,
 		RequestID:     id,
 	}
-	requestQueue <- monitor.MeterMessage{
+
+	requestQueue <- msg
+	exchangeQueue <- monitor.ExchangeMessage{
+		MeterMessage:msg,
+		RequestID: operationID,
+		RequestBody:RandStringBytesMaskImprSrc(rand.Intn(1024)+100),
+		RequestHeader:map[string][]string{
+			"X-DITAS-RequestID":[]string{id},
+			"X-DITAS-OperationID":[]string{operationID},
+		},
+	}
+
+	msg = monitor.MeterMessage{
 		RequestID:      id,
 		OperationID:    operationID,
 		RequestTime:    responseTime,
 		ResponseLength: rand.Int63n(1024),
 		ResponseCode:   (2 + rand.Intn(3)) * 100,
+	}
+	requestQueue <- msg
+	exchangeQueue <- monitor.ExchangeMessage{
+		MeterMessage:msg,
+		RequestID: operationID,
+		ResponseBody:RandStringBytesMaskImprSrc(rand.Intn(1024)+100),
+		ResponseHeader:map[string][]string{
+			"X-DITAS-RequestID":[]string{id},
+			"X-DITAS-OperationID":[]string{operationID},
+		},
 	}
 }
 
@@ -255,7 +318,7 @@ func generateRequestID(remoteAddr string) string {
 	return uuid.NewV5(uuid.NamespaceX500, fmt.Sprintf("%s-%d-%d", remoteAddr, now.Day(), now.Minute())).String()
 }
 
-func (gen *Generator) startRequestAgent(queue chan monitor.MeterMessage, QuitChan chan bool) {
+func (gen *Generator) startRequestAgent(queue chan monitor.MeterMessage,exchange chan monitor.ExchangeMessage, QuitChan chan bool) {
 
 	monitor.SetLogger(logger)
 	monitor.SetLog(log)
@@ -265,14 +328,29 @@ func (gen *Generator) startRequestAgent(queue chan monitor.MeterMessage, QuitCha
 		VDCName:          viper.GetString("VDCName"),
 	}, queue)
 	if err != nil {
-		log.Fatalf("failed to start RequestMonitor Agent %v", err)
+		log.Fatalf("failed to start ElasticReporter Agent %v", err)
 	}
+	var exchangeAgent monitor.ExchangeReporter
+	if viper.GetString("exchange") != ""{
+		exchangeAgent,err = monitor.NewExchangeReporter(viper.GetString("exchange"),exchange)
+
+		if err != nil {
+			log.Fatalf("failed to start ExchangeReporter Agent %v", err)
+		}
+	}
+	
 
 	requestAgent.Start()
+	if viper.GetString("exchange") != ""{
+		exchangeAgent.Start()
+	}
 
 	stop := <-QuitChan
 	if stop {
 		requestAgent.Stop()
+		if viper.GetString("exchange") != ""{
+			exchangeAgent.Stop()
+		}
 	}
 
 }
