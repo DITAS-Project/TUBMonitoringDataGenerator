@@ -4,7 +4,7 @@ This utility generates data based on a given blueprint and saves it in elasticse
 It is intended for testing purposes only.
 
 ## Installation
-Use `go get` to fetch this repository and then use `dep ensure` followed by `go build`. 
+Use `go get` to fetch this repository followed by `go build`. 
 This will build an executable of this utility.
 
 ## Usage
