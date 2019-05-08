@@ -8,6 +8,8 @@ Use `go get` to fetch this repository followed by `go build`.
 This will build an executable of this utility.
 
 ## Usage
+For local testing, you can run `docker-compose up` to start a elasticserach and a kibana instace. You can than run the generator with the follwoing options to creat some data in it:`./TUBMonitoringDataGenerator --blueprint <paht to a blueprint> --elastic http://locahost:9200 --events 100 -wt 1`. 
+
 ```
 --VDCName string          VDCName to use (default "tubvdc")
 --blueprint string        the blueprint to use (default "resources/concrete_blueprint_doctor.json")
@@ -22,3 +24,4 @@ This will build an executable of this utility.
  - 0: Random (will generate Random values for each metric)
  - 1: Violation Free, generates a random value within the bounds of the blueprint
  - 2: Timed Violation, generates valid values within the bounds of the blueprint until a fixed delay than all metrics will be 0. Usage: `./TUBMonitoringDataGenerator --gen 2 20s`
+
