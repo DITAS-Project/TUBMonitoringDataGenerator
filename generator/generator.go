@@ -22,6 +22,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	util "github.com/DITAS-Project/TUBUtil"
@@ -83,6 +84,13 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 
 	ElasticSearchURL := viper.GetString("ElasticSearchURL")
 
+	var credentials []string
+	if viper.GetString("elasticAuth") != "" {
+		credentials = strings.Split(viper.GetString("elasticAuth"), ":")
+	} else {
+		credentials = nil
+	}
+
 	//set logger
 	monitor.SetLog(log)
 	monitor.SetLogger(logger)
@@ -92,7 +100,7 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 	util.SetLog(log)
 
 	log.Debug("Waiting for ElasticSerach")
-	util.WaitForAvailible(ElasticSearchURL, nil)
+	util.WaitForAvailibleWithAuth(ElasticSearchURL, credentials, nil)
 
 	if viper.GetString("exchange") != "" {
 		log.Infof("exchange consumer is configured, waiting until ready")
@@ -101,11 +109,22 @@ func NewGenerator(mg MeterGenerator) (*Generator, error) {
 
 	log.Infof("using %s for elastic", ElasticSearchURL)
 
-	client, err := elastic.NewSimpleClient(
-		elastic.SetURL(ElasticSearchURL),
-		elastic.SetErrorLog(log),
-		elastic.SetInfoLog(log),
-	)
+	var client *elastic.Client
+
+	if credentials != nil {
+		client, err = elastic.NewSimpleClient(
+			elastic.SetURL(ElasticSearchURL),
+			elastic.SetErrorLog(log),
+			elastic.SetInfoLog(log),
+			elastic.SetBasicAuth(credentials[0], credentials[1]),
+		)
+	} else {
+		client, err = elastic.NewSimpleClient(
+			elastic.SetURL(ElasticSearchURL),
+			elastic.SetErrorLog(log),
+			elastic.SetInfoLog(log),
+		)
+	}
 
 	if err != nil {
 		log.Errorf("unable to create elastic client tracer: %+v\n", err)
@@ -149,7 +168,7 @@ func (gen *Generator) Start() {
 		log.Debug("sending limited number of events")
 		for i := 0; i < viper.GetInt("Events"); i++ {
 			sendData()
-			log.Debugf("send %d event %d remaining",i , viper.GetInt("Events")-i)
+			log.Debugf("send %d event %d remaining", i, viper.GetInt("Events")-i)
 		}
 	} else {
 		log.Debug("sending unlimited number of events")
@@ -163,7 +182,6 @@ func (gen *Generator) Start() {
 	stopSignal <- true
 
 }
-
 
 func (gen *Generator) startRequestAgent(queue chan monitor.MeterMessage, exchange chan monitor.ExchangeMessage, QuitChan chan bool) {
 
@@ -235,8 +253,8 @@ func (gen *Generator) startAgent(queue chan agent.ElasticData, QuitChan chan boo
 		select {
 		case work := <-queue:
 			err := agt.AddToES(work)
-			if err != nil{
-				log.Debugf("Failed to send agent data %+v",err)
+			if err != nil {
+				log.Debugf("Failed to send agent data %+v", err)
 			}
 		case <-QuitChan:
 			// We have been asked to stop.
